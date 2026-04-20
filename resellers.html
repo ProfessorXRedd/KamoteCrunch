@@ -716,17 +716,17 @@
         <a href="shop.html">💥 Spicy BBQ</a>
         <a href="shop.html">🍋 Sweet &amp; Sour</a>
       </div>
-      <div class="footer-col">
+            <div class="footer-col">
         <div class="footer-col-title">Connect</div>
         <a href="https://www.facebook.com/profile.php?id=100070086709566" target="_blank" class="footer-social fb">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
           Facebook
         </a>
         <a href="https://www.tiktok.com/@kamotecrunch1" target="_blank" class="footer-social tt">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.45a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/></svg>
           TikTok
         </a>
-        <a href="https://mail.google.com/mail/?view=cm&to=kamotecrunch2024%40gmail.com&su=Hi%20Kamote%20Crunch!" target="_blank" class="footer-social email">
+        <a href="https://mail.google.com/mail/?view=cm&to=kamotecrunch2024%40gmail.com&su=Hi%20Kamote%20Crunch!" target="_blank" class="footer-social email" onclick="handleFooterEmail(event)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
           Email Us
         </a>
@@ -889,7 +889,7 @@
       </div>
     </div>
     <div class="r-gcash-footer">
-      <button class="r-gcash-done-btn" onclick="closeRGCash(); applyViaMessenger();">
+      <button class="r-gcash-done-btn" onclick="closeRGCash(); applyViaMessenger();" style="background:linear-gradient(135deg,#007bff,#0090d4);">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.908 1.442 5.504 3.706 7.21V22l3.388-1.86c.905.25 1.864.385 2.906.385 5.523 0 10-4.145 10-9.282S17.523 2 12 2zm1.024 12.5l-2.55-2.72-4.975 2.72 5.476-5.81 2.61 2.72 4.916-2.72-5.477 5.81z"/></svg>
         Done Paying — Apply via Messenger
       </button>
@@ -965,7 +965,8 @@
     if (!validateAndBuild()) return;
     if (navigator.clipboard) navigator.clipboard.writeText(_appText).catch(()=>{});
     window.open(FB_MESSENGER_URL, '_blank');
-    showToast('📋 Application text auto-copied! Paste it in Messenger to send your application.', 6000);
+    const IS_MOB_R2 = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    showToast(IS_MOB_R2 ? '📋 Application copied! Paste it in Messenger to apply.' : '📋 Application copied! Paste it in the Messenger chat.', 6000);
     setTimeout(closeApply, 900);
   }
 
@@ -975,10 +976,15 @@
     const subject = encodeURIComponent('🏪 Kamote Crunch Reseller Application – ' + _currentPkg.name + ' – ' + name);
     const body    = encodeURIComponent(_appText);
     /* Try Gmail compose in new tab; fallback to mailto */
-    const gmailUrl = 'https://mail.google.com/mail/?view=cm&to=kamotecrunch2024%40gmail.com&su=' + subject + '&body=' + body;
-    const newTab = window.open(gmailUrl, '_blank');
-    if (!newTab) { window.location.href = 'mailto:kamotecrunch2024@gmail.com?subject=' + subject + '&body=' + body; }
-    showToast('✉️ Gmail compose opened with your application pre-filled! Just click Send.', 5000);
+    const IS_MOB_E = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (IS_MOB_E) {
+      window.location.href = 'mailto:kamotecrunch2024@gmail.com?subject=' + subject + '&body=' + body;
+      showToast('✉️ Opening Gmail app with your application pre-filled! Just tap Send.', 5000);
+    } else {
+      const gmailUrl = 'https://mail.google.com/mail/?view=cm&to=kamotecrunch2024%40gmail.com&su=' + subject + '&body=' + body;
+      window.open(gmailUrl, '_blank');
+      showToast('✉️ Gmail opened with your application pre-filled! Just click Send.', 5000);
+    }
   }
 
   function copyApplication() {
@@ -1054,5 +1060,20 @@
   });
 })();
 </script>
+
+<script>
+function handleFooterEmail(e) {
+  e.preventDefault();
+  const IS_MOBILE = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const addr = 'kamotecrunch2024@gmail.com';
+  const sub  = encodeURIComponent('Hi Kamote Crunch!');
+  if (IS_MOBILE) {
+    window.location.href = 'mailto:' + addr + '?subject=' + sub;
+  } else {
+    window.open('https://mail.google.com/mail/?view=cm&to=' + encodeURIComponent(addr) + '&su=' + sub, '_blank');
+  }
+}
+</script>
+
 </body>
 </html>

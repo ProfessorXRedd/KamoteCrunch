@@ -161,6 +161,55 @@
     .footer-links { gap: 2rem; }
     .footer-bottom { flex-direction: column; text-align: center; }
   }
+
+  /* ── FEEDBACK FORM ────────────────────────────────────────── */
+  .feedback-send-row {
+    display: flex; gap: 10px; margin-top: 0.2rem; flex-wrap: wrap;
+  }
+  .feedback-primary {
+    flex: 1; min-width: 140px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .feedback-messenger-btn {
+    flex: 1; min-width: 140px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: #1877F2; color: #fff; border: none;
+    padding: 14px 16px; border-radius: 12px;
+    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1rem;
+    cursor: pointer; transition: opacity 0.2s, transform 0.2s;
+    box-shadow: 0 4px 14px rgba(24,119,242,0.35);
+    position: relative; overflow: hidden;
+  }
+  .feedback-messenger-btn::after {
+    content: ''; position: absolute; inset: 0;
+    background: rgba(255,255,255,0.12);
+    transform: translateX(-100%) skewX(-15deg);
+    transition: transform 0.4s cubic-bezier(0.22,1,0.36,1);
+  }
+  .feedback-messenger-btn:hover::after { transform: translateX(120%) skewX(-15deg); }
+  .feedback-messenger-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+  .feedback-error {
+    color: #ff7575; font-size: 0.82rem; font-weight: 700;
+    min-height: 1rem; margin-top: 0.5rem;
+  }
+  .feedback-success {
+    display: flex; align-items: center; gap: 12px;
+    background: rgba(45,138,78,0.15);
+    border: 1.5px solid rgba(45,138,78,0.4);
+    border-radius: 12px; padding: 14px 16px; margin-top: 1rem;
+    animation: feedbackFadeIn 0.4s ease;
+  }
+  .feedback-success-icon { font-size: 1.4rem; flex-shrink: 0; }
+  .feedback-success strong { color: #80ffd4; font-size: 0.95rem; display: block; margin-bottom: 2px; }
+  .feedback-success span   { color: rgba(255,255,255,0.55); font-size: 0.82rem; }
+  @keyframes feedbackFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @media (max-width: 480px) {
+    .feedback-send-row { flex-direction: column; }
+  }
+
 </style>
 </head>
 <body>
@@ -442,16 +491,19 @@
 
     <div class="contact-form">
       <div class="form-title">Send us a Message 💬</div>
+
       <div class="form-group">
         <label for="fname">Your Name</label>
-        <input type="text" id="fname" placeholder="e.g. Maria Santos">
+        <input type="text" id="fname" placeholder="e.g. Maria Santos" autocomplete="name">
       </div>
+
       <div class="form-group">
         <label for="femail">Email Address</label>
-        <input type="email" id="femail" placeholder="jonel1@example.com">
+        <input type="email" id="femail" placeholder="e.g. maria@example.com" autocomplete="email">
       </div>
+
       <div class="form-group">
-        <label for="fflavor">Favorite Flavor (optional)</label>
+        <label for="fflavor">Favorite Flavor <span style="font-weight:600;color:rgba(255,255,255,0.4);font-size:0.82rem;">(optional)</span></label>
         <select id="fflavor">
           <option value="">-- Pick a flavor --</option>
           <option>Caramel</option>
@@ -463,12 +515,35 @@
           <option>Can't choose — I love them all!</option>
         </select>
       </div>
+
       <div class="form-group">
         <label for="fmsg">Message</label>
-        <textarea id="fmsg" placeholder="Tell us what you think, ask about orders, or just say hi!"></textarea>
+        <textarea id="fmsg" placeholder="Tell us what you think, ask about orders, or just say hi!" rows="4"></textarea>
       </div>
-      <button class="form-submit" onclick="submitForm()">Send Message 🍠</button>
-      <div class="success-msg" id="successMsg">✅ Thanks! We'll get back to you soon.</div>
+
+      <!-- Send method buttons -->
+      <div class="feedback-send-row">
+        <button class="form-submit feedback-primary" onclick="submitFeedbackEmail()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+          Send Message
+        </button>
+        <button class="feedback-messenger-btn" onclick="submitFeedbackMessenger()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.908 1.442 5.504 3.706 7.21V22l3.388-1.86c.905.25 1.864.385 2.906.385 5.523 0 10-4.145 10-9.282S17.523 2 12 2zm1.024 12.5l-2.55-2.72-4.975 2.72 5.476-5.81 2.61 2.72 4.916-2.72-5.477 5.81z"/></svg>
+          via Messenger
+        </button>
+      </div>
+
+      <!-- Validation error -->
+      <div class="feedback-error" id="feedbackError"></div>
+
+      <!-- Success state -->
+      <div class="feedback-success" id="feedbackSuccess" style="display:none;">
+        <span class="feedback-success-icon">✅</span>
+        <div>
+          <strong>Message sent!</strong><br>
+          <span>We'll get back to you soon. Salamat! 🍠</span>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -502,17 +577,17 @@
         <a href="shop.html">💥 Spicy BBQ</a>
         <a href="shop.html">🍋 Sweet &amp; Sour</a>
       </div>
-      <div class="footer-col">
+                  <div class="footer-col">
         <div class="footer-col-title">Connect</div>
         <a href="https://www.facebook.com/profile.php?id=100070086709566" target="_blank" class="footer-social fb">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
           Facebook
         </a>
         <a href="https://www.tiktok.com/@kamotecrunch1" target="_blank" class="footer-social tt">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.45a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/></svg>
           TikTok
         </a>
-        <a href="https://mail.google.com/mail/?view=cm&to=kamotecrunch2024%40gmail.com&su=Hi%20Kamote%20Crunch!" target="_blank" class="footer-social email">
+        <a href="https://mail.google.com/mail/?view=cm&to=kamotecrunch2024%40gmail.com&su=Hi%20Kamote%20Crunch!" target="_blank" class="footer-social email" onclick="handleFooterEmail(event)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
           Email Us
         </a>
@@ -521,7 +596,7 @@
           0930 096 2240
         </a>
       </div>
-    </div>
+      </div>
   </div>
   <div class="footer-bottom">
     <span>© 2025 Kamote Crunch. Handcrafted with love in the Philippines.</span>
@@ -809,85 +884,21 @@
 
 <!-- html2canvas for save-to-image -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script>
-/* ── ABOUT MEDIA SLIDER ───────────────────────────────────── */
-(function() {
-  const track  = document.getElementById('mediaTrack');
-  const dotsEl = document.getElementById('sliderDots');
-  if (!track) return;
-  const slides  = track.querySelectorAll('.media-slide');
-  const total   = slides.length;
-  let   current = 0;
-
-  /* Build dots */
-  slides.forEach((_, i) => {
-    const d = document.createElement('button');
-    d.className = 'slider-dot' + (i === 0 ? ' active' : '');
-    d.setAttribute('aria-label', 'Slide ' + (i+1));
-    d.onclick = () => goTo(i);
-    dotsEl.appendChild(d);
-  });
-
-  /* Counter badge */
-  const slider = document.getElementById('mediaSlider');
-  const counter = document.createElement('div');
-  counter.className = 'slider-counter';
-  counter.id = 'sliderCounter';
-  counter.textContent = '1 / ' + total;
-  slider.appendChild(counter);
-
-  function goTo(n) {
-    /* Pause any playing video on current slide */
-    const prevVid = slides[current].querySelector('video');
-    if (prevVid) { prevVid.pause(); }
-    current = (n + total) % total;
-    track.style.transform = 'translateX(-' + (current * 100) + '%)';
-    dotsEl.querySelectorAll('.slider-dot').forEach((d,i) => d.classList.toggle('active', i === current));
-    document.getElementById('sliderCounter').textContent = (current+1) + ' / ' + total;
-  }
-
-  window.sliderMove = (dir) => goTo(current + dir);
-
-  /* Touch/swipe support */
-  let startX = 0;
-  slider.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, {passive:true});
-  slider.addEventListener('touchend',   e => {
-    const diff = startX - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 40) goTo(current + (diff > 0 ? 1 : -1));
-  }, {passive:true});
-})();
-</script>
-<script>
-/* ── PAGE TRANSITIONS ─────────────────────────────────────── */
-(function() {
-  const overlay = document.getElementById('ptOverlay');
-  const bar     = document.getElementById('ptBar');
-  if (!overlay) return;
-
-  /* Fade IN on load */
-  document.body.style.opacity = '0';
-  document.body.style.transition = 'opacity 0.35s ease';
-  window.addEventListener('load', () => {
-    requestAnimationFrame(() => {
-      document.body.style.opacity = '1';
-    });
-  });
-
-  /* Intercept same-origin link clicks */
-  document.addEventListener('click', (e) => {
-    const link = e.target.closest('a[href]');
-    if (!link) return;
-    const href = link.getAttribute('href');
-    if (!href || href.startsWith('#') || href.startsWith('http') ||
-        href.startsWith('mailto') || href.startsWith('tel') ||
-        link.target === '_blank') return;
-    e.preventDefault();
-    overlay.classList.add('visible');
-    requestAnimationFrame(() => { if(bar) bar.style.width = '100%'; });
-    setTimeout(() => { window.location.href = href; }, 480);
-  });
-})();
-</script>
 <script src="misc/main.js"></script>
+
+<script>
+function handleFooterEmail(e) {
+  e.preventDefault();
+  const IS_MOBILE = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const addr = 'kamotecrunch2024@gmail.com';
+  const sub  = encodeURIComponent('Hi Kamote Crunch!');
+  if (IS_MOBILE) {
+    window.location.href = 'mailto:' + addr + '?subject=' + sub;
+  } else {
+    window.open('https://mail.google.com/mail/?view=cm&to=' + encodeURIComponent(addr) + '&su=' + sub, '_blank');
+  }
+}
+</script>
+
 </body>
 </html>
