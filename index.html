@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kamote Crunch – Sweet Potato Chips</title>
+  <link rel="icon" type="image/svg+xml" href="images/logo.jpg">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="misc/style.css">
+<style>
+  /* ── PAGE TRANSITIONS ─────────────────────────────────────── */
+  .page-transition-overlay {
+    position: fixed; inset: 0; z-index: 99999;
+    background: #1C0A00;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+  .page-transition-overlay.visible { opacity: 1; pointer-events: auto; }
+  .pt-logo {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    opacity: 0; transform: scale(0.85);
+    transition: opacity 0.25s ease 0.1s, transform 0.3s cubic-bezier(0.22,1,0.36,1) 0.1s;
+  }
+  .page-transition-overlay.visible .pt-logo { opacity: 1; transform: scale(1); }
+  .pt-logo-text {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.5rem; color: #F5A623; letter-spacing: 1px;
+  }
+  .pt-bar-wrap {
+    width: 120px; height: 3px;
+    background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden;
+  }
+  .pt-bar {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, #E8621A, #F5A623);
+    border-radius: 2px;
+    transition: width 0.4s cubic-bezier(0.22,1,0.36,1);
+  }
+
+  /* ── ABOUT MEDIA SLIDER ──────────────────────────────────── */
+  .media-slider {
+    position: relative; width: 100%;
+    border-radius: 24px; overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    background: #0e0500;
+    aspect-ratio: 4/3;
+  }
+  .media-slider-track {
+    display: flex; height: 100%;
+    transition: transform 0.45s cubic-bezier(0.22,1,0.36,1);
+  }
+  .media-slide {
+    min-width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; position: relative;
+  }
+  .media-slide-img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform 0.5s ease;
+  }
+  .media-slide-video-wrap {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    background: #0e0500;
+  }
+  .media-slide-video {
+    width: 100%; height: 100%; object-fit: cover;
+    display: block;
+  }
+  /* Arrows */
+  .slider-arrow {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: rgba(28,10,0,0.7); backdrop-filter: blur(6px);
+    border: 1.5px solid rgba(245,166,35,0.3);
+    color: #F5A623; font-size: 1.6rem; font-weight: 900;
+    width: 38px; height: 38px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; z-index: 10;
+    transition: background 0.2s, transform 0.2s;
+    line-height: 1;
+  }
+  .slider-arrow:hover { background: rgba(232,98,26,0.8); transform: translateY(-50%) scale(1.1); }
+  .slider-prev { left: 10px; }
+  .slider-next { right: 10px; }
+  /* Dots */
+  .slider-dots {
+    position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 6px; z-index: 10;
+  }
+  .slider-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: rgba(255,255,255,0.3); cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    border: none; padding: 0;
+  }
+  .slider-dot.active {
+    background: #F5A623; transform: scale(1.3);
+  }
+  /* Slide counter badge */
+  .slider-counter {
+    position: absolute; top: 10px; right: 12px;
+    background: rgba(28,10,0,0.65); backdrop-filter: blur(4px);
+    color: rgba(255,255,255,0.6); font-size: 0.7rem; font-weight: 700;
+    padding: 3px 9px; border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.1); z-index: 10;
+  }
+
+  /* ── RICH FOOTER ─────────────────────────────────────────── */
+  .site-footer {
+    background: #0A0400;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding-top: 3rem;
+  }
+  .footer-inner {
+    display: flex; gap: 4%; flex-wrap: wrap;
+    max-width: 1100px; margin: 0 auto;
+    padding: 0 5% 2.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .footer-brand {
+    display: flex; align-items: flex-start; gap: 12px;
+    flex: 0 0 220px; max-width: 220px; margin-bottom: 1rem;
+  }
+  .footer-logo-img {
+    width: 48px; height: 48px; border-radius: 50%;
+    object-fit: cover; border: 2px solid rgba(245,166,35,0.3); flex-shrink: 0;
+  }
+  .footer-brand-name { font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: #F5A623; }
+  .footer-brand-tagline { font-size: 0.75rem; color: rgba(255,255,255,0.35); margin-top: 3px; line-height: 1.5; }
+  .footer-links { display: flex; gap: 3rem; flex-wrap: wrap; flex: 1; }
+  .footer-col { display: flex; flex-direction: column; gap: 8px; min-width: 120px; }
+  .footer-col-title {
+    font-size: 0.72rem; font-weight: 900; letter-spacing: 2px;
+    text-transform: uppercase; color: rgba(255,255,255,0.3);
+    margin-bottom: 4px;
+  }
+  .footer-col a {
+    font-size: 0.85rem; color: rgba(255,255,255,0.5); text-decoration: none;
+    font-weight: 600; transition: color 0.2s;
+  }
+  .footer-col a:hover { color: #F5A623; }
+  .footer-social {
+    display: flex !important; align-items: center; gap: 7px !important;
+  }
+  .footer-social.fb:hover  { color: #4a9af5 !important; }
+  .footer-social.tt:hover  { color: #ff6b9d !important; }
+  .footer-social.email:hover { color: #ff8a80 !important; }
+  .footer-social.phone:hover { color: #80ffd4 !important; }
+  .footer-bottom {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 0.5rem;
+    padding: 1.2rem 5%;
+    font-size: 0.78rem; color: rgba(255,255,255,0.25);
+  }
+  .footer-bottom-tag { color: rgba(245,166,35,0.4); }
+  @media (max-width: 768px) {
+    .footer-inner { flex-direction: column; gap: 2rem; }
+    .footer-brand { max-width: 100%; }
+    .footer-links { gap: 2rem; }
+    .footer-bottom { flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── PAGE TRANSITION OVERLAY ───────────────────────────────── -->
+<div class="page-transition-overlay" id="ptOverlay">
+  <div class="pt-logo">
+    <span style="font-size:2rem;">🍠</span>
+    <span class="pt-logo-text">Kamote Crunch</span>
+    <div class="pt-bar-wrap"><div class="pt-bar" id="ptBar"></div></div>
+  </div>
+</div>
+
+<!-- ── INTRO OVERLAY ───────────────────────────────────────── -->
+<div id="intro-overlay">
+  <div class="intro-particles" id="introParticles"></div>
+  <div class="intro-logo-wrap">
+    <div class="intro-ring intro-ring2"></div>
+    <div class="intro-ring"></div>
+    <img class="intro-logo-img" src="images/logo.jpg" alt="Kamote Crunch">
+  </div>
+  <div class="intro-title">Kamote <span class="gold">Crunch</span></div>
+  <div class="intro-tagline">Sweet Potato Chips</div>
+  <div class="intro-bar"></div>
+</div>
+
+<!-- ── NAV ─────────────────────────────────────────────────── -->
+<nav>
+  <a href="#home" class="nav-logo">
+    <img src="images/logo.jpg" alt="Kamote Crunch Logo">
+    <span>Kamote Crunch</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#home">Home</a></li>
+    <li><a href="#about">About Us</a></li>
+    <li><a href="#products">Products</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="shop.html" class="nav-shop-link">Shop</a></li>
+    <li><a href="resellers.html" class="nav-reseller-link">🏪 Become a Reseller</a></li>
+  </ul>
+  <div class="nav-end">
+    <a href="shop.html" class="nav-shop-btn">Order Now</a>
+    <button class="hamburger" onclick="toggleMenu()" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile dropdown -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#home"     onclick="closeMenu()">Home</a>
+  <a href="#about"    onclick="closeMenu()">About Us</a>
+  <a href="#products" onclick="closeMenu()">Products</a>
+  <a href="#contact"  onclick="closeMenu()">Contact</a>
+  <a href="shop.html" class="mobile-shop-link">Shop Now</a>
+  <a href="resellers.html" class="mobile-reseller-link">🏪 Become a Reseller</a>
+</div>
+
+<!-- ── HERO ────────────────────────────────────────────────── -->
+<section id="home">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-badge">🍠 Authentically Filipino</div>
+      <h1 class="hero-title">Feel the<br><span>Crunch.</span><br>Taste the Flavor.</h1>
+      <p class="hero-subtitle">Handcrafted Sweet Potato Chips</p>
+      <p class="hero-desc">Born from the heart of Filipino tradition, Kamote Crunch transforms the humble kamote into an irresistibly crunchy, flavor-packed snack. Six bold flavors. One unforgettable crunch.</p>
+      <div class="hero-btns">
+        <a href="#products" class="btn-primary">Explore Flavors</a>
+        <a href="#about"    class="btn-secondary">Our Story</a>
+      </div>
+    </div>
+    <div class="hero-img">
+      <img src="images/flavors.jpg" alt="Kamote Crunch Flavors">
+      <div class="hero-img-badge">6 Bold Flavors 🔥</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FLAVOR STRIP ────────────────────────────────────────── -->
+<div class="flavor-strip">
+  <div class="flavor-strip-inner">
+    <span>Caramel</span><span>Cheese</span><span>Spicy Cheese</span>
+    <span>BBQ</span><span>Spicy BBQ</span><span>Sweet &amp; Sour</span>
+    <span>Caramel</span><span>Cheese</span><span>Spicy Cheese</span>
+    <span>BBQ</span><span>Spicy BBQ</span><span>Sweet &amp; Sour</span>
+  </div>
+</div>
+
+<!-- ── ABOUT ───────────────────────────────────────────────── -->
+<section id="about">
+  <div class="about-inner reveal">
+
+    <div class="about-img">
+      <div class="media-slider" id="mediaSlider">
+        <div class="media-slider-track" id="mediaTrack">
+          <!-- Slide 1: Logo/photo placeholder -->
+          <div class="media-slide active">
+            <img src="images/logo.jpg" alt="Kamote Crunch Brand" class="media-slide-img">
+          </div>
+          <!-- Slides 2–5: Video placeholders — replace src with your video file paths -->
+          <div class="media-slide">
+            <div class="media-slide-video-wrap">
+              <video class="media-slide-video" src="videos/video1.mp4" controls playsinline preload="none" poster="images/logo.jpg">
+                Your browser does not support video.
+              </video>
+            </div>
+          </div>
+          <div class="media-slide">
+            <div class="media-slide-video-wrap">
+              <video class="media-slide-video" src="videos/video2.mp4" controls playsinline preload="none" poster="images/logo.jpg">
+                Your browser does not support video.
+              </video>
+            </div>
+          </div>
+          <div class="media-slide">
+            <div class="media-slide-video-wrap">
+              <video class="media-slide-video" src="videos/video3.mp4" controls playsinline preload="none" poster="images/logo.jpg">
+                Your browser does not support video.
+              </video>
+            </div>
+          </div>
+          <div class="media-slide">
+            <div class="media-slide-video-wrap">
+              <video class="media-slide-video" src="videos/video4.mp4" controls playsinline preload="none" poster="images/logo.jpg">
+                Your browser does not support video.
+              </video>
+            </div>
+          </div>
+        </div>
+        <!-- Navigation arrows -->
+        <button class="slider-arrow slider-prev" onclick="sliderMove(-1)" aria-label="Previous">&#8249;</button>
+        <button class="slider-arrow slider-next" onclick="sliderMove(1)"  aria-label="Next">&#8250;</button>
+        <!-- Dots -->
+        <div class="slider-dots" id="sliderDots"></div>
+      </div>
+    </div>
+    <div class="about-content">
+      <p class="section-label">Our Story</p>
+      <h2 class="section-title">Made with <span>Passion</span>,<br>Rooted in Tradition</h2>
+      <p>Kamote Crunch was born from a simple love — for kamote, for flavor, and for sharing great snacks with great people. What started as a homegrown idea has grown into a proudly Filipino artisan snack brand, handcrafting every batch with care and authenticity.</p>
+      <p>We take the humble sweet potato — a staple of Filipino culture — and elevate it into something truly extraordinary. Our chips are hand-crisped to perfection, seasoned with bold, distinct flavors that range from sweet and indulgent to smoky and spicy.</p>
+      <p>We believe snacks should tell a story. Ours speaks of community, craftsmanship, and the vibrant flavors of the Philippines. Every bag is a small-batch labor of love — because you deserve more than ordinary.</p>
+      <div class="values">
+        <div class="value-item">
+          <span class="value-icon">🌱</span>
+          <div class="value-text">
+            <strong>Locally Sourced</strong>
+            <span>Real kamote from Filipino farms, nothing artificial.</span>
+          </div>
+        </div>
+        <div class="value-item">
+          <span class="value-icon">🤲</span>
+          <div class="value-text">
+            <strong>Handcrafted with Care</strong>
+            <span>Small-batch artisan production for consistent quality.</span>
+          </div>
+        </div>
+        <div class="value-item">
+          <span class="value-icon">💬</span>
+          <div class="value-text">
+            <strong>Community First</strong>
+            <span>Direct-to-consumer. Always accessible. Always responsive.</span>
+          </div>
+        </div>
+      </div>
+      <div class="about-stats">
+        <div class="stat"><div class="stat-num">6</div><div class="stat-label">Unique Flavors</div></div>
+        <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Real Kamote</div></div>
+        <div class="stat"><div class="stat-num">❤️</div><div class="stat-label">Filipino Made</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PRODUCTS ────────────────────────────────────────────── -->
+<section id="products">
+  <div class="products-header reveal">
+    <p class="section-label">Our Flavors</p>
+    <h2 class="section-title">A Flavor for <span>Every Mood</span></h2>
+    <p>Each flavor is carefully crafted to deliver a unique experience — sweet, savory, smoky, or spicy. Find your favorite or try them all.</p>
+  </div>
+  <div class="products-grid">
+
+    <div class="product-card reveal">
+      <img src="images/caramel.jpg" alt="Caramel">
+      <div class="product-info">
+        <span class="product-flavor-tag">Sweet</span>
+        <div class="product-name">🍮 Caramel</div>
+        <p class="product-desc">Indulge in golden caramel sweetness coating every crispy bite. A nostalgic treat reimagined with a satisfying crunch.</p>
+        <div class="product-price">₱35.00</div>
+        <a href="shop.html" class="product-shop-link">Order this flavor →</a>
+      </div>
+    </div>
+
+    <div class="product-card reveal reveal-delay-1">
+      <img src="images/cheese.jpg" alt="Cheese">
+      <div class="product-info">
+        <span class="product-flavor-tag">Savory</span>
+        <div class="product-name">🧀 Cheese</div>
+        <p class="product-desc">Rich, creamy cheese flavor meets the natural sweetness of kamote. Bold, savory, and utterly addictive.</p>
+        <div class="product-price">₱35.00</div>
+        <a href="shop.html" class="product-shop-link">Order this flavor →</a>
+      </div>
+    </div>
+
+    <div class="product-card reveal reveal-delay-2">
+      <img src="images/spicycheese.jpg" alt="Spicy Cheese">
+      <div class="product-info">
+        <span class="product-flavor-tag">Spicy</span>
+        <div class="product-name">🌶️ Spicy Cheese</div>
+        <p class="product-desc">The best of both worlds — molten cheese heat and a fiery chili kick. Feel the sweet heat, taste the savory.</p>
+        <div class="product-price">₱35.00</div>
+        <a href="shop.html" class="product-shop-link">Order this flavor →</a>
+      </div>
+    </div>
+
+    <div class="product-card reveal reveal-delay-3">
+      <img src="images/bbq.jpg" alt="BBQ">
+      <div class="product-info">
+        <span class="product-flavor-tag">Smoky</span>
+        <div class="product-name">🔥 Barbecue</div>
+        <p class="product-desc">Smoky, sweet, and deeply satisfying. Our BBQ flavor brings handcrafted barbecue bliss to every chip.</p>
+        <div class="product-price">₱35.00</div>
+        <a href="shop.html" class="product-shop-link">Order this flavor →</a>
+      </div>
+    </div>
+
+    <div class="product-card reveal reveal-delay-4">
+      <img src="images/spicybarbecue.jpg" alt="Spicy BBQ">
+      <div class="product-info">
+        <span class="product-flavor-tag">Spicy + Smoky</span>
+        <div class="product-name">💥 Spicy Barbecue</div>
+        <p class="product-desc">Smoky sweetness turned up to 11. A bold fusion of BBQ depth and fiery spice — for those who dare.</p>
+        <div class="product-price">₱35.00</div>
+        <a href="shop.html" class="product-shop-link">Order this flavor →</a>
+      </div>
+    </div>
+
+    <div class="product-card reveal reveal-delay-5">
+      <img src="images/sweetandsour.jpg" alt="Sweet &amp; Sour">
+      <div class="product-info">
+        <span class="product-flavor-tag">Tangy</span>
+        <div class="product-name">🍋 Sweet &amp; Sour</div>
+        <p class="product-desc">A tangy, zingy explosion balanced with natural kamote sweetness. Refreshing, bright, and totally moreish.</p>
+        <div class="product-price">₱35.00</div>
+        <a href="shop.html" class="product-shop-link">Order this flavor →</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── CONTACT ─────────────────────────────────────────────── -->
+<section id="contact">
+  <div class="contact-inner reveal">
+
+    <div class="contact-info">
+      <p class="section-label">Get in Touch</p>
+      <h2 class="section-title">We'd Love to<br><span>Hear from You</span></h2>
+      <p>Have questions, bulk orders, or just want to tell us which flavor you're obsessed with? We're always here — just reach out or find us on social media!</p>
+
+      <div class="social-buttons">
+        <!-- Facebook -->
+        <a href="https://www.facebook.com/profile.php?id=100070086709566" target="_blank" class="social-btn fb">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+          </svg>
+          Follow us on Facebook
+        </a>
+        <!-- TikTok -->
+        <a href="https://www.tiktok.com/@kamotecrunch1" target="_blank" class="social-btn tt">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/>
+          </svg>
+          Follow us on TikTok
+        </a>
+      </div>
+    </div>
+
+    <div class="contact-form">
+      <div class="form-title">Send us a Message 💬</div>
+      <div class="form-group">
+        <label for="fname">Your Name</label>
+        <input type="text" id="fname" placeholder="e.g. Maria Santos">
+      </div>
+      <div class="form-group">
+        <label for="femail">Email Address</label>
+        <input type="email" id="femail" placeholder="jonel1@example.com">
+      </div>
+      <div class="form-group">
+        <label for="fflavor">Favorite Flavor (optional)</label>
+        <select id="fflavor">
+          <option value="">-- Pick a flavor --</option>
+          <option>Caramel</option>
+          <option>Cheese</option>
+          <option>Spicy Cheese</option>
+          <option>Barbecue</option>
+          <option>Spicy Barbecue</option>
+          <option>Sweet &amp; Sour</option>
+          <option>Can't choose — I love them all!</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="fmsg">Message</label>
+        <textarea id="fmsg" placeholder="Tell us what you think, ask about orders, or just say hi!"></textarea>
+      </div>
+      <button class="form-submit" onclick="submitForm()">Send Message 🍠</button>
+      <div class="success-msg" id="successMsg">✅ Thanks! We'll get back to you soon.</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── FOOTER ──────────────────────────────────────────────── -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <img src="images/logo.jpg" alt="Kamote Crunch" class="footer-logo-img">
+      <div>
+        <div class="footer-brand-name">🍠 Kamote Crunch</div>
+        <div class="footer-brand-tagline">Handcrafted Sweet Potato Chips</div>
+      </div>
+    </div>
+    <div class="footer-links">
+      <div class="footer-col">
+        <div class="footer-col-title">Pages</div>
+        <a href="index.html">Home</a>
+        <a href="shop.html">🛒 Shop</a>
+        <a href="resellers.html">🏪 Resellers</a>
+        <a href="index.html#about">About Us</a>
+        <a href="index.html#contact">Contact</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Flavors</div>
+        <a href="shop.html">🍮 Caramel</a>
+        <a href="shop.html">🧀 Cheese</a>
+        <a href="shop.html">🌶️ Spicy Cheese</a>
+        <a href="shop.html">🔥 Barbecue</a>
+        <a href="shop.html">💥 Spicy BBQ</a>
+        <a href="shop.html">🍋 Sweet &amp; Sour</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Connect</div>
+        <a href="https://www.facebook.com/profile.php?id=100070086709566" target="_blank" class="footer-social fb">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Facebook
+        </a>
+        <a href="https://www.tiktok.com/@kamotecrunch1" target="_blank" class="footer-social tt">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.45a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/></svg>
+          TikTok
+        </a>
+        <a href="https://mail.google.com/mail/?view=cm&to=kamotecrunch2024%40gmail.com&su=Hi%20Kamote%20Crunch!" target="_blank" class="footer-social email">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+          Email Us
+        </a>
+        <a href="tel:+639300962240" class="footer-social phone">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+          0930 096 2240
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 Kamote Crunch. Handcrafted with love in the Philippines.</span>
+    <span class="footer-bottom-tag">Naturally Crafted. Deliciously Crunchy. 🍠</span>
+  </div>
+</footer>
+
+
+<!-- ── ORDER SUMMARY MODAL ──────────────────────────────────── -->
+<div class="summary-overlay" id="summaryOverlay" onclick="closeSummary()"></div>
+<div class="summary-modal" id="summaryModal">
+  <div class="summary-inner" onclick="event.stopPropagation()">
+
+    <div class="summary-header">
+      <h3>🍠 Place Your Order</h3>
+      <button class="summary-close" onclick="closeSummary()">✕</button>
+    </div>
+
+    <!-- STEP INDICATOR -->
+    <div class="order-steps">
+      <div class="order-step active" id="step1Indicator">
+        <span class="step-num">1</span>
+        <span class="step-label">Your Details</span>
+      </div>
+      <div class="step-connector"></div>
+      <div class="order-step" id="step2Indicator">
+        <span class="step-num">2</span>
+        <span class="step-label">Review & Send</span>
+      </div>
+    </div>
+
+    <!-- ── STEP 1: Customer Details Form ── -->
+    <div id="orderStep1">
+      <div class="order-form-wrap">
+        <p class="order-form-intro">Fill in your details so we can process your order correctly.</p>
+
+        <div class="oform-group">
+          <label class="oform-label" for="oName">
+            <span class="oform-icon">👤</span> Full Name <span class="oform-req">*</span>
+          </label>
+          <input type="text" id="oName" class="oform-input" placeholder="e.g. Maria Santos" autocomplete="name">
+        </div>
+
+        <div class="oform-group">
+          <label class="oform-label" for="oAddress">
+            <span class="oform-icon">📍</span> Delivery Address <span class="oform-req">*</span>
+          </label>
+          <textarea id="oAddress" class="oform-input oform-textarea" placeholder="House No., Street, Barangay, City/Municipality, Province" rows="3"></textarea>
+        </div>
+
+        <div class="oform-group">
+          <label class="oform-label" for="oPhone">
+            <span class="oform-icon">📱</span> Contact Number <span class="oform-req">*</span>
+          </label>
+          <input type="tel" id="oPhone" class="oform-input" placeholder="e.g. 09XX-XXX-XXXX" autocomplete="tel">
+        </div>
+
+        <div class="oform-group">
+          <label class="oform-label" for="oEmail">
+            <span class="oform-icon">✉️</span> Email Address <span class="oform-optional">(optional — for email order)</span>
+          </label>
+          <input type="email" id="oEmail" class="oform-input" placeholder="e.g. maria@example.com" autocomplete="email">
+        </div>
+
+        <div class="oform-group">
+          <label class="oform-label" for="oPayment">
+            <span class="oform-icon">💳</span> Mode of Payment <span class="oform-req">*</span>
+          </label>
+          <div class="payment-options" id="paymentOptions">
+            <label class="payment-option" id="payOptCOD">
+              <input type="radio" name="oPayment" value="COD" id="oCOD" onchange="onPaymentChange()">
+              <span class="payopt-icon">🚚</span>
+              <span class="payopt-label">Cash on Delivery</span>
+              <span class="payopt-check">✓</span>
+            </label>
+            <label class="payment-option" id="payOptGCash">
+              <input type="radio" name="oPayment" value="GCash" id="oGCash" onchange="onPaymentChange()">
+              <span class="payopt-icon">📲</span>
+              <span class="payopt-label">GCash</span>
+              <span class="payopt-check">✓</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="oform-group">
+          <label class="oform-label" for="oNote">
+            <span class="oform-icon">📝</span> Order Note <span class="oform-optional">(optional)</span>
+          </label>
+          <input type="text" id="oNote" class="oform-input" placeholder="e.g. Please pack separately, gift wrap, etc.">
+        </div>
+
+        <div class="oform-error" id="oFormError"></div>
+      </div>
+
+      <div class="summary-actions">
+        <button class="action-btn messenger" onclick="goToStep2()">
+          Continue to Review →
+        </button>
+        <button class="action-btn copy-text" onclick="closeSummary()">
+          ← Back to Cart
+        </button>
+      </div>
+    </div>
+
+    <!-- ── STEP 2: Branded Receipt + Actions ── -->
+    <div id="orderStep2" style="display:none;">
+
+      <!-- BRANDED RECEIPT CARD — saved as image -->
+      <div id="receiptCard">
+        <div class="receipt-brand">
+          <img class="receipt-brand-logo" src="images/logo.jpg" alt="Kamote Crunch">
+          <div class="receipt-brand-text">
+            <div class="receipt-brand-name">Kamote Crunch</div>
+            <div class="receipt-brand-tagline">Handcrafted Sweet Potato Chips</div>
+          </div>
+        </div>
+
+        <div class="receipt-date" id="receiptDate"></div>
+
+        <!-- Customer info block (inside card) -->
+        <div class="receipt-customer">
+          <div class="receipt-cust-row">
+            <span class="receipt-cust-icon">👤</span>
+            <span id="receiptName" class="receipt-cust-val">—</span>
+          </div>
+          <div class="receipt-cust-row">
+            <span class="receipt-cust-icon">📍</span>
+            <span id="receiptAddress" class="receipt-cust-val">—</span>
+          </div>
+          <div class="receipt-cust-row">
+            <span class="receipt-cust-icon">📱</span>
+            <span id="receiptPhone" class="receipt-cust-val">—</span>
+          </div>
+          <div class="receipt-cust-row" id="receiptEmailRow" style="display:none;">
+            <span class="receipt-cust-icon">✉️</span>
+            <span id="receiptEmail" class="receipt-cust-val">—</span>
+          </div>
+          <div class="receipt-cust-row" id="receiptPaymentRow">
+            <span class="receipt-cust-icon">💳</span>
+            <span id="receiptPayment" class="receipt-cust-val receipt-payment-badge">—</span>
+          </div>
+        </div>
+
+        <div class="receipt-divider"></div>
+        <div id="receiptItems"></div>
+        <div class="receipt-total-row">
+          <span class="receipt-total-label">Total</span>
+          <span class="receipt-total-amount" id="receiptTotal">₱0.00</span>
+        </div>
+
+        <!-- Note only shown if filled -->
+        <div class="receipt-order-note" id="receiptNoteWrap" style="display:none;">
+          <span class="receipt-cust-icon">📝</span>
+          <span id="receiptNote"></span>
+        </div>
+
+        <div class="receipt-note">
+          Screenshot or save this image, then send via Messenger<br>
+          or email us to complete your order 🍠
+        </div>
+      </div>
+
+      <!-- ACTION BUTTONS -->
+      <div class="summary-actions">
+
+        <button class="action-btn messenger" id="btnMessenger" onclick="confirmAndSend()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.908 1.442 5.504 3.706 7.21V22l3.388-1.86c.905.25 1.864.385 2.906.385 5.523 0 10-4.145 10-9.282S17.523 2 12 2zm1.024 12.5l-2.55-2.72-4.975 2.72 5.476-5.81 2.61 2.72 4.916-2.72-5.477 5.81z"/>
+          </svg>
+          Send Order via Messenger
+        </button>
+
+        <button class="action-btn email-btn" id="btnEmail" onclick="sendEmail()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+          </svg>
+          Send Order via Email
+        </button>
+
+        <div class="action-divider" id="divSaveForLater" style="display:none;">— or save for later —</div>
+
+        <button class="action-btn save-img" id="saveImgBtn" onclick="saveImage()" style="display:none;">
+          📸 Save Order as Image
+        </button>
+
+        <button class="action-btn copy-text" id="copyBtn" onclick="copyOrder()">
+          📋 Copy Order Text
+        </button>
+
+        <button class="action-btn copy-text" onclick="goToStep1()" style="margin-top:2px;">
+          ← Edit Details
+        </button>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ── FLOATING SHOP BUTTON ──────────────────────────────────── -->
+<a href="shop.html" class="fab-shop" title="Order Now">
+  <span class="fab-icon">🛒</span>
+  <span class="fab-label">Order Now</span>
+</a>
+
+<!-- ── FLOATING RESELLER BUTTON ─────────────────────────────── -->
+<a href="resellers.html" class="fab-reseller" title="Become a Reseller">
+  <span class="fab-icon">🏪</span>
+  <span class="fab-label">Become a Resellers</span>
+</a>
+
+
+<!-- ── GCASH PAYMENT MODAL ───────────────────────────────────── -->
+<div class="gcash-overlay" id="gcashOverlay" onclick="closeGCash()"></div>
+<div class="gcash-modal" id="gcashModal">
+  <div class="gcash-inner" onclick="event.stopPropagation()">
+    <div class="gcash-header">
+      <div class="gcash-title-wrap">
+        <span class="gcash-logo-txt">G</span>
+        <span class="gcash-title">GCash Payment</span>
+      </div>
+      <button class="gcash-close" onclick="closeGCash()">✕</button>
+    </div>
+
+    <div class="gcash-body">
+      <div class="gcash-steps">
+        <div class="gcash-step">
+          <div class="gcash-step-num">1</div>
+          <div class="gcash-step-body">
+            <div class="gcash-step-title">Pay via GCash</div>
+            <div class="gcash-step-desc">Scan the QR code or send to <strong>0930 096 2240</strong>. Include your name in the GCash note.</div>
+          </div>
+        </div>
+        <div class="gcash-step-arrow">↓</div>
+        <div class="gcash-step">
+          <div class="gcash-step-num">2</div>
+          <div class="gcash-step-body">
+            <div class="gcash-step-title">Screenshot your GCash receipt</div>
+            <div class="gcash-step-desc">Take a screenshot of your GCash payment confirmation / receipt right after paying.</div>
+          </div>
+        </div>
+        <div class="gcash-step-arrow">↓</div>
+        <div class="gcash-step">
+          <div class="gcash-step-num">3</div>
+          <div class="gcash-step-body">
+            <div class="gcash-step-title">Send your order + receipt</div>
+            <div class="gcash-step-desc">Tap <strong>Done Paying</strong> below to send your order details, then attach your GCash screenshot in the chat or email.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="gcash-qr-wrap">
+        <img class="gcash-qr-img" src="images/qr.png" alt="GCash QR Code">
+        <div class="gcash-qr-label">Scan with GCash App</div>
+      </div>
+
+      <div class="gcash-divider-text">— or send to number —</div>
+
+      <div class="gcash-number-card">
+        <div class="gcash-number-name">Fernando Jr. L.</div>
+        <div class="gcash-number">
+          <span class="gcash-num-text">0930 096 2240</span>
+          <button class="gcash-copy-num" onclick="copyGCashNum(this)">Copy</button>
+        </div>
+        <div class="gcash-num-label">GCash Number</div>
+      </div>
+
+      <div class="gcash-amount-remind">
+        <span class="gcash-remind-icon">💡</span>
+        <span>Please include your <strong>name</strong> in the GCash note/message when sending payment.</span>
+      </div>
+    </div>
+
+    <div class="gcash-footer">
+      <button class="gcash-done-btn" onclick="closeGCash(); confirmAndSend();">
+        ✅ Done Paying — Send Order via Messenger
+      </button>
+      <button class="gcash-done-btn gcash-email-btn" onclick="closeGCash(); sendEmail();">
+        ✉️ Done Paying — Send Order via Email
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- html2canvas for save-to-image -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+/* ── ABOUT MEDIA SLIDER ───────────────────────────────────── */
+(function() {
+  const track  = document.getElementById('mediaTrack');
+  const dotsEl = document.getElementById('sliderDots');
+  if (!track) return;
+  const slides  = track.querySelectorAll('.media-slide');
+  const total   = slides.length;
+  let   current = 0;
+
+  /* Build dots */
+  slides.forEach((_, i) => {
+    const d = document.createElement('button');
+    d.className = 'slider-dot' + (i === 0 ? ' active' : '');
+    d.setAttribute('aria-label', 'Slide ' + (i+1));
+    d.onclick = () => goTo(i);
+    dotsEl.appendChild(d);
+  });
+
+  /* Counter badge */
+  const slider = document.getElementById('mediaSlider');
+  const counter = document.createElement('div');
+  counter.className = 'slider-counter';
+  counter.id = 'sliderCounter';
+  counter.textContent = '1 / ' + total;
+  slider.appendChild(counter);
+
+  function goTo(n) {
+    /* Pause any playing video on current slide */
+    const prevVid = slides[current].querySelector('video');
+    if (prevVid) { prevVid.pause(); }
+    current = (n + total) % total;
+    track.style.transform = 'translateX(-' + (current * 100) + '%)';
+    dotsEl.querySelectorAll('.slider-dot').forEach((d,i) => d.classList.toggle('active', i === current));
+    document.getElementById('sliderCounter').textContent = (current+1) + ' / ' + total;
+  }
+
+  window.sliderMove = (dir) => goTo(current + dir);
+
+  /* Touch/swipe support */
+  let startX = 0;
+  slider.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, {passive:true});
+  slider.addEventListener('touchend',   e => {
+    const diff = startX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) goTo(current + (diff > 0 ? 1 : -1));
+  }, {passive:true});
+})();
+</script>
+<script>
+/* ── PAGE TRANSITIONS ─────────────────────────────────────── */
+(function() {
+  const overlay = document.getElementById('ptOverlay');
+  const bar     = document.getElementById('ptBar');
+  if (!overlay) return;
+
+  /* Fade IN on load */
+  document.body.style.opacity = '0';
+  document.body.style.transition = 'opacity 0.35s ease';
+  window.addEventListener('load', () => {
+    requestAnimationFrame(() => {
+      document.body.style.opacity = '1';
+    });
+  });
+
+  /* Intercept same-origin link clicks */
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a[href]');
+    if (!link) return;
+    const href = link.getAttribute('href');
+    if (!href || href.startsWith('#') || href.startsWith('http') ||
+        href.startsWith('mailto') || href.startsWith('tel') ||
+        link.target === '_blank') return;
+    e.preventDefault();
+    overlay.classList.add('visible');
+    requestAnimationFrame(() => { if(bar) bar.style.width = '100%'; });
+    setTimeout(() => { window.location.href = href; }, 480);
+  });
+})();
+</script>
+<script src="misc/main.js"></script>
+</body>
+</html>
