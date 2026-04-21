@@ -902,18 +902,22 @@
 </div>
 
 <script>
-  const FB_MESSENGER_URL = 'https://www.facebook.com/messages/t/103771944407778';
+  /* ── Config ────────────────────────────────────────────── */
+  const IS_MOB = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const FB_ID  = '103771944407778';
+  const GMAIL  = 'kamotecrunch2024@gmail.com';
   let _currentPkg = { name:'', price:'', pcs:'' };
-  let _appText = '';
+  let _appText    = '';
 
+  /* ── Open/close apply modal ─────────────────────────────── */
   function openApply(name, price, pcs) {
     _currentPkg = { name, price, pcs };
-    document.getElementById('applyPkgName').textContent = name + ' Package';
+    document.getElementById('applyPkgName').textContent  = name + ' Package';
     document.getElementById('applyPkgDetail').textContent = price + ' · ' + pcs + ' · FREE Tarpaulin';
     document.getElementById('rFormError').textContent = '';
-    /* Reset payment selection */
-    document.querySelectorAll('input[name="rPayment"]').forEach(r=>r.checked=false);
-    document.querySelectorAll('.payment-option').forEach(el=>el.classList.remove('selected'));
+    /* Reset payment */
+    document.querySelectorAll('input[name="rPayment"]').forEach(r => r.checked = false);
+    document.querySelectorAll('.payment-option').forEach(el => el.classList.remove('selected'));
     document.getElementById('rBtnGCash').style.display     = 'none';
     document.getElementById('rBtnMessenger').style.display = 'flex';
     document.getElementById('rBtnEmail').style.display     = 'flex';
@@ -926,109 +930,130 @@
     document.getElementById('applyModal').classList.remove('open');
   }
 
+  /* ── Validate form + build application text ─────────────── */
   function validateAndBuild() {
     const name    = document.getElementById('rName').value.trim();
     const address = document.getElementById('rAddress').value.trim();
     const phone   = document.getElementById('rPhone').value.trim();
     const email   = document.getElementById('rEmail').value.trim();
     const note    = document.getElementById('rNote').value.trim();
-    const paymentEl = document.querySelector('input[name="rPayment"]:checked');
-    const payment = paymentEl ? paymentEl.value : '';
+    const payEl   = document.querySelector('input[name="rPayment"]:checked');
+    const payment = payEl ? payEl.value : '';
     const errEl   = document.getElementById('rFormError');
-    if (!name)    { errEl.textContent='⚠ Please enter your full name.';        document.getElementById('rName').focus();    return null; }
-    if (!address) { errEl.textContent='⚠ Please enter your address.';          document.getElementById('rAddress').focus(); return null; }
-    if (!phone)   { errEl.textContent='⚠ Please enter your contact number.';   document.getElementById('rPhone').focus();   return null; }
-    if (!payment) { errEl.textContent='⚠ Please select a payment method.';     return null; }
+
+    if (!name)    { errEl.textContent = '⚠ Please enter your full name.';      document.getElementById('rName').focus();    return null; }
+    if (!address) { errEl.textContent = '⚠ Please enter your address.';        document.getElementById('rAddress').focus(); return null; }
+    if (!phone)   { errEl.textContent = '⚠ Please enter your contact number.'; document.getElementById('rPhone').focus();   return null; }
+    if (!payment) { errEl.textContent = '⚠ Please select a payment method.';   return null; }
     errEl.textContent = '';
+
     const now     = new Date();
-    const dateStr = now.toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
-    const timeStr = now.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'});
+    const dateStr = now.toLocaleDateString('en-PH', { year:'numeric', month:'long', day:'numeric' });
+    const timeStr = now.toLocaleTimeString('en-PH', { hour:'2-digit', minute:'2-digit' });
+
     _appText =
-        `🏪 KAMOTE CRUNCH — RESELLER APPLICATION\n`
-      + `${dateStr} · ${timeStr}\n`
-      + `━━━━━━━━━━━━━━━━━━━━\n`
-      + `📦 Package  : ${_currentPkg.name} (${_currentPkg.pcs})\n`
-      + `💰 Price    : ${_currentPkg.price}\n`
-      + `💳 Payment  : ${payment}\n`
-      + `━━━━━━━━━━━━━━━━━━━━\n`
-      + `👤 Name     : ${name}\n`
-      + `📍 Address  : ${address}\n`
-      + `📱 Contact  : ${phone}\n`
-      + (email ? `✉️ Email    : ${email}\n` : '')
-      + (note  ? `📝 Message  : ${note}\n`  : '')
-      + `━━━━━━━━━━━━━━━━━━━━\n`
-      + `I would like to apply as a Kamote Crunch reseller. Salamat! 🍠`;
+        '🏪 KAMOTE CRUNCH — RESELLER APPLICATION
+'
+      + dateStr + ' · ' + timeStr + '
+'
+      + '━━━━━━━━━━━━━━━━━━━━
+'
+      + '📦 Package  : ' + _currentPkg.name + ' (' + _currentPkg.pcs + ')
+'
+      + '💰 Price    : ' + _currentPkg.price + '
+'
+      + '💳 Payment  : ' + payment + '
+'
+      + '━━━━━━━━━━━━━━━━━━━━
+'
+      + '👤 Name     : ' + name    + '
+'
+      + '📍 Address  : ' + address + '
+'
+      + '📱 Contact  : ' + phone   + '
+'
+      + (email ? '✉️ Email    : ' + email + '
+' : '')
+      + (note  ? '📝 Message  : ' + note  + '
+' : '')
+      + '━━━━━━━━━━━━━━━━━━━━
+'
+      + 'I would like to apply as a Kamote Crunch reseller. Salamat! 🍠';
+
     return _appText;
   }
 
-  function applyViaMessenger() {
-    if (!validateAndBuild()) return;
-    if (navigator.clipboard) navigator.clipboard.writeText(_appText).catch(()=>{});
-    window.open(FB_MESSENGER_URL, '_blank');
-    const IS_MOB_R2 = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    showToast(IS_MOB_R2 ? '📋 Application copied! Paste it in Messenger to apply.' : '📋 Application copied! Paste it in the Messenger chat.', 6000);
-    setTimeout(closeApply, 900);
-  }
-
-  function applyViaEmail() {
-    if (!validateAndBuild()) return;
-    const name    = document.getElementById('rName').value.trim();
-    const subject = encodeURIComponent('🏪 Kamote Crunch Reseller Application – ' + _currentPkg.name + ' – ' + name);
-    const body    = encodeURIComponent(_appText);
-    /* Try Gmail compose in new tab; fallback to mailto */
-    const IS_MOB_E = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    if (IS_MOB_E) {
-      window.location.href = 'mailto:kamotecrunch2024@gmail.com?subject=' + subject + '&body=' + body;
-      showToast('✉️ Opening Gmail app with your application pre-filled! Just tap Send.', 5000);
-    } else {
-      const gmailUrl = 'https://mail.google.com/mail/?view=cm&to=kamotecrunch2024%40gmail.com&su=' + subject + '&body=' + body;
-      window.open(gmailUrl, '_blank');
-      showToast('✉️ Gmail opened with your application pre-filled! Just click Send.', 5000);
-    }
-  }
-
-  function copyApplication() {
-    if (!validateAndBuild()) return;
-    navigator.clipboard.writeText(_appText).then(() => {
-      const btn = document.getElementById('rCopyBtn');
-      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
-      setTimeout(()=>{ btn.textContent='📋 Copy Application Text'; btn.classList.remove('copied'); }, 2200);
-    }).catch(()=>{ alert('Could not copy. Please try again.'); });
-  }
-
+  /* ── Payment radio toggle ───────────────────────────────── */
   function onRPaymentChange() {
     const val = document.querySelector('input[name="rPayment"]:checked')?.value;
     document.querySelectorAll('.payment-option').forEach(el => el.classList.remove('selected'));
     if (val === 'COD')   document.getElementById('rPayOptCOD').classList.add('selected');
     if (val === 'GCash') document.getElementById('rPayOptGCash').classList.add('selected');
-    /* Show/hide action buttons */
     const isGCash = val === 'GCash';
-    document.getElementById('rBtnGCash').style.display    = isGCash ? 'flex'  : 'none';
+    document.getElementById('rBtnGCash').style.display     = isGCash ? 'flex'  : 'none';
     document.getElementById('rBtnMessenger').style.display = isGCash ? 'none'  : 'flex';
     document.getElementById('rBtnEmail').style.display     = isGCash ? 'none'  : 'flex';
     document.getElementById('rDivOr').style.display        = isGCash ? 'none'  : 'block';
   }
 
-  function openRGCash()  { document.getElementById('rGCashOverlay').classList.add('open'); document.getElementById('rGCashModal').classList.add('open'); }
-  function closeRGCash() { document.getElementById('rGCashOverlay').classList.remove('open'); document.getElementById('rGCashModal').classList.remove('open'); }
-  function copyRGCashNum(btn) {
-    navigator.clipboard.writeText('09300962240').then(()=>{ btn.textContent='✓ Copied!'; setTimeout(()=>{btn.textContent='Copy';},2000); })
-    .catch(()=>{ alert('Number: 09300962240'); });
+  /* ── Apply via Messenger (device-aware) ─────────────────── */
+  function applyViaMessenger() {
+    if (!validateAndBuild()) return;
+    /* Auto-copy application text */
+    navigator.clipboard?.writeText(_appText).catch(() => {});
+    /* Open Messenger — app on mobile, web on desktop */
+    if (IS_MOB) {
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = 'fb-messenger://user-thread/' + FB_ID;
+      document.body.appendChild(iframe);
+      setTimeout(() => document.body.removeChild(iframe), 1500);
+      setTimeout(() => window.open('https://m.me/' + FB_ID, '_blank'), 600);
+    } else {
+      window.open('https://www.facebook.com/messages/t/' + FB_ID, '_blank');
+    }
+    showToast(IS_MOB
+      ? '📋 Application copied! Paste it in Messenger to apply.'
+      : '📋 Application copied! Paste it in the Messenger chat.',
+      6000);
+    setTimeout(closeApply, 900);
   }
 
-  function showToast(msg, duration=3500) {
-    let toast = document.getElementById('kcToast');
-    if (!toast) {
-      toast = document.createElement('div');
-      toast.id = 'kcToast'; toast.className = 'kc-toast';
-      document.body.appendChild(toast);
+  /* ── Apply via Email (device-aware) ─────────────────────── */
+  function applyViaEmail() {
+    if (!validateAndBuild()) return;
+    const name    = document.getElementById('rName').value.trim();
+    const subject = encodeURIComponent('🏪 Kamote Crunch Reseller Application – ' + _currentPkg.name + ' – ' + name);
+    const body    = encodeURIComponent(_appText);
+    if (IS_MOB) {
+      window.location.href = 'mailto:' + GMAIL + '?subject=' + subject + '&body=' + body;
+      showToast('✉️ Opening Gmail app with your application pre-filled! Just tap Send.', 5000);
+    } else {
+      window.open('https://mail.google.com/mail/?view=cm&to=' + encodeURIComponent(GMAIL) + '&su=' + subject + '&body=' + body, '_blank');
+      showToast('✉️ Gmail opened with your application pre-filled! Just click Send.', 5000);
     }
-    toast.textContent = msg;
-    toast.classList.add('show');
-    clearTimeout(toast._timer);
-    toast._timer = setTimeout(()=>toast.classList.remove('show'), duration);
+  }
+
+  /* ── GCash modal ────────────────────────────────────────── */
+  function openRGCash()  { document.getElementById('rGCashOverlay').classList.add('open');    document.getElementById('rGCashModal').classList.add('open');    }
+  function closeRGCash() { document.getElementById('rGCashOverlay').classList.remove('open'); document.getElementById('rGCashModal').classList.remove('open'); }
+  function copyRGCashNum(btn) {
+    navigator.clipboard.writeText('09300962240')
+      .then(() => { btn.textContent = '✓ Copied!'; setTimeout(() => { btn.textContent = 'Copy'; }, 2000); })
+      .catch(() => { alert('Number: 09300962240'); });
+  }
+
+  /* ── Toast ──────────────────────────────────────────────── */
+  function showToast(msg, duration = 3500) {
+    let t = document.getElementById('kcToast');
+    if (!t) { t = document.createElement('div'); t.id = 'kcToast'; t.className = 'kc-toast'; document.body.appendChild(t); }
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), duration);
   }
 </script>
+
 <script>
 /* ── PAGE TRANSITIONS ─────────────────────────────────────── */
 (function() {
